@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <meta charset="UTF-8">
+    <title>定时关机程序</title>
+    <style>
+        /* 全局样式优化 */
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
+            --danger-color: #f44336;
+            --danger-dark: #d32f2f;
+            --secondary-color: #2196F3;
+            --secondary-dark: #1976D2;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 30px;
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .container:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0 0 25px 0;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        /* 输入组样式优化 */
+        .input-group {
+            background: var(--background-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: nowrap;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group input[type="radio"] {
+            margin: 0;
+        }
+
+        .input-group input[type="number"],
+        .input-group input[type="time"] {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input[type="date"] {
+            margin-right: 8px;
+        }
+
+        input[type="number"]:focus,
+        input[type="time"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 调整输入框宽度 */
+        .input-group input[type="number"] {
+            width: 100px;
+        }
+        
+        .input-group input[type="date"] {
+            width: 130px;
+        }
+        
+        .input-group input[type="time"] {
+            width: 120px;
+        }
+        
+        /* 调整标签宽度 */
+        .input-group label {
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        /* 按钮样式优化 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .button-group button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button-group button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .button-group button:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+
+        .primary-button {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .secondary-button {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .secondary-button:hover {
+            background: var(--secondary-dark);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .danger-button {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .danger-button:hover {
+            background: var(--danger-dark);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 设置面板样式 */
+        .settings-panel {
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: var(--card-background);
+            box-shadow: var(--shadow);
+        }
+
+        .settings-panel h3 {
+            margin: 0;
+            padding: 15px 20px;
+            background: var(--background-color);
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-content {
+            padding: 20px;
+        }
+
+        .settings-group {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-group h4 {
+            margin: 0 0 12px 0;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .settings-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #notifyTime {
+            width: 70px;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .checkbox-group label {
+            margin-right: 20px;
+        }
+
+        .settings-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-item input[type="number"] {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* 快速时间按钮样式优化 */
+        .quick-times {
+            margin: 5px 0 15px 95px;  /* 对齐输入框 */
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-times button {
+            padding: 8px 16px;
+            min-width: 90px;
+            border-radius: var(--border-radius);
+            font-size: 13px;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            border: 1px solid #ddd;
+            color: #333;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-times button:hover {
+            background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+            border-color: #ccc;
+        }
+
+        .quick-times button:active {
+            background-color: #d0d0d0;
+            transform: translateY(1px);
+        }
+
+        /* 消息提示样式 */
+        #message {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            font-weight: 500;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        #message.show {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        /* 消息类型样式 */
+        #message.info {
+            color: var(--secondary-color);
+            background: #e3f2fd;
+        }
+
+        /* 自定义滚动条样式 */
+        .container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 添加测试按钮样式 */
+        #testNotification {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #testNotification:hover {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+
+        /* 自定义复选框样式 */
+        input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+
+        /* 自定义数字输入框样式 */
+        input[type="number"],
+        input[type="date"],
+        input[type="time"] {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 自定义日期和时间选择器样式 */
+        input[type="date"],
+        input[type="time"] {
+            min-width: 130px;
+            position: relative;
+            padding-right: 30px;
+            transform: none !important;
+        }
+
+        /* 美化日期和时间的占位符文本 */
+        input[type="date"]::placeholder,
+        input[type="time"]::placeholder {
+            color: #999;
+        }
+
+        /* 调整日期和时间输入框在禁用状态下的样式 */
+        input[type="date"]:disabled,
+        input[type="time"]:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* 确保所有输入框和按钮不会有变形效果 */
+        input,
+        button,
+        .container,
+        .input-group,
+        .quick-times button {
+            transform: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>关机设置</h2>
+        <div class="input-group">
+            <input type="radio" name="shutdownType" id="timer" value="timer" checked>
+            <label for="timer">延迟关机</label>
+            <input type="number" id="minutes" placeholder="分钟" min="1">
+
+            <!-- 快速时间选择区域 -->
+
+        </div>
+
+        <div class="quick-times">
+            <button class="secondary-button" data-minutes="30">30分钟</button>
+            <button class="secondary-button" data-minutes="60">1小时</button>
+            <button class="secondary-button" data-minutes="120">2小时</button>
+            <button class="secondary-button" data-minutes="240">4小时</button>
+        </div>
+        
+        <div class="input-group">
+            <input type="radio" name="shutdownType" id="schedule" value="schedule">
+            <label for="schedule">定时关机</label>
+            <input type="date" id="scheduleDate">
+            <input type="time" id="scheduleTime">
+        </div>
+        <div class="settings-group">
+            <div class="settings-item">
+                <div class="checkbox-group" style="margin-right: 15px;">
+                    <input type="checkbox" id="notifyBeforeShutdown" checked>
+                    <label for="notifyBeforeShutdown">关机前通知</label>
+                </div>
+                <div class="time-input-group">
+                    <label for="notifyTime">提前通知时间(分钟)</label>
+                    <input type="number" id="notifyTime" value="5" min="1" max="60">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="button-group">
+            <button class="primary-button" id="setShutdownBtn">设置关机</button>
+            <button class="danger-button" id="cancelShutdownBtn">取消关机</button>
+        </div>
+        <div id="message"></div>
+        <!-- 关机设置 -->
+       
+
+        <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+
+</html>

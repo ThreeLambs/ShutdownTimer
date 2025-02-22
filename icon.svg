@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景圆 -->
+    <circle cx="128" cy="128" r="120" fill="#4CAF50"/>
+    
+    <!-- 电源按钮符号 -->
+    <path d="M128 60V140" stroke="white" stroke-width="24" stroke-linecap="round"/>
+    
+    <!-- 圆弧 -->
+    <path d="M180 100C188 114 192 130 192 148C192 186 160 216 120 216C80 216 48 186 48 148C48 110 80 80 120 80"
+        stroke="white" stroke-width="24" stroke-linecap="round"/>
+</svg>

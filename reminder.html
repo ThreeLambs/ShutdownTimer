@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #333;
+            user-select: none;
+            overflow: hidden;
+        }
+        
+        .reminder-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            padding: 20px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideIn 0.3s ease;
+            height: calc(100vh - 40px);
+            box-sizing: border-box;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .title img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .message {
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+            color: #666;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .cancel-btn {
+            background: #ff4d4f;
+            color: white;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="reminder-container">
+        <h3 class="title">
+            <img src="icon-warning.png" alt="warning">
+            关机提醒
+        </h3>
+        <p class="message" id="reminderMessage"></p>
+        <div class="buttons">
+            <button class="confirm-btn" onclick="sendResponse(0)">知道了</button>
+            <button class="cancel-btn" onclick="sendResponse(1)">取消关机</button>
+        </div>
+    </div>
+    
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        // 接收消息内容
+        ipcRenderer.on('reminder-message', (event, message) => {
+            document.getElementById('reminderMessage').textContent = message;
+        });
+        
+        // 发送用户响应
+        function sendResponse(response) {
+            ipcRenderer.send('reminder-response', response);
+        }
+    </script>
+</body>
+</html> 
