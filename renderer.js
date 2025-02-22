@@ -181,9 +181,6 @@ function showMessage(text, type, persist = false) {
     }
     
     messageDiv.classList.add('show');
-
-    // 记录日志
-    ipcRenderer.send('log', { level: 'INFO', message: `消息更新: ${text}` });
 }
 
 // 修改事件监听器注册
